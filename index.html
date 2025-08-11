@@ -248,8 +248,11 @@
                     </div>
                 </div>
 
-                <!-- Import/Export Controls -->
+                <!-- Save and Import/Export Controls -->
                 <div class="flex flex-wrap gap-4 mb-6 no-print">
+                    <button onclick="simpanDataSiswa()" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-200 font-medium">
+                        💾 Simpan Data Siswa
+                    </button>
                     <input type="file" id="fileImport" accept=".xlsx,.xls" class="hidden" onchange="importExcel()">
                     <button onclick="document.getElementById('fileImport').click()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200">Import Excel</button>
                     <button onclick="downloadTemplate()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200">Download Template</button>
@@ -326,7 +329,9 @@
 
                 <!-- Save Button -->
                 <div class="mb-6 no-print">
-                    <button onclick="simpanDataGuru()" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition duration-200">Simpan Data Guru</button>
+                    <button onclick="simpanDataGuru()" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-200 font-medium">
+                        💾 Simpan Data Guru
+                    </button>
                     <button onclick="exportGuruExcel()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200 ml-2">Export Excel</button>
                 </div>
 
@@ -388,7 +393,9 @@
                 </div>
 
                 <div class="mt-6 no-print">
-                    <button onclick="simpanNilai()" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition duration-200">Simpan Nilai</button>
+                    <button onclick="simpanNilai()" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-200 font-medium">
+                        💾 Simpan Nilai
+                    </button>
                     <button onclick="exportNilaiExcel()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200 ml-2">Export Excel</button>
                 </div>
             </div>
@@ -450,7 +457,9 @@
                 </div>
 
                 <div class="mt-6 no-print">
-                    <button onclick="simpanAbsensi()" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition duration-200">Simpan Absensi</button>
+                    <button onclick="simpanAbsensi()" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-200 font-medium">
+                        💾 Simpan Absensi
+                    </button>
                     <button onclick="exportAbsensiExcel()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200 ml-2">Export Excel</button>
                 </div>
             </div>
@@ -506,7 +515,10 @@
                 </div>
 
                 <div class="mt-6 no-print">
-                    <button onclick="cetakLaporanAbsensi()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200">Cetak Laporan</button>
+                    <button onclick="simpanLaporanAbsensi()" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-200 font-medium">
+                        💾 Simpan Laporan
+                    </button>
+                    <button onclick="cetakLaporanAbsensi()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200 ml-2">Cetak Laporan</button>
                     <button onclick="exportLaporanAbsensiExcel()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200 ml-2">Export Excel</button>
                 </div>
             </div>
@@ -539,6 +551,9 @@
                         </select>
                     </div>
                     <div class="flex items-end gap-2">
+                        <button onclick="simpanLaporanNilai()" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-200 font-medium">
+                            💾 Simpan Laporan
+                        </button>
                         <button onclick="cetakLaporan()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200">Cetak</button>
                         <button onclick="exportLaporanExcel()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200">Export Excel</button>
                     </div>
@@ -1119,7 +1134,7 @@
 
         function simpanNilai() {
             localStorage.setItem('dataNilai', JSON.stringify(dataNilai));
-            alert('Nilai berhasil disimpan!');
+            alert('✅ Nilai berhasil disimpan ke browser!');
         }
 
         function exportNilaiExcel() {
@@ -1194,9 +1209,24 @@
             XLSX.writeFile(wb, `nilai_${kelas}_${mapel}.xlsx`);
         }
 
+        function simpanDataSiswa() {
+            localStorage.setItem('dataSiswa', JSON.stringify(dataSiswa));
+            alert('✅ Data siswa berhasil disimpan ke browser!');
+        }
+
         function simpanDataGuru() {
             localStorage.setItem('dataGuru', JSON.stringify(dataGuru));
-            alert('Data guru berhasil disimpan!');
+            alert('✅ Data guru berhasil disimpan ke browser!');
+        }
+
+        function simpanLaporanAbsensi() {
+            localStorage.setItem('dataAbsensi', JSON.stringify(dataAbsensi));
+            alert('✅ Laporan absensi berhasil disimpan ke browser!');
+        }
+
+        function simpanLaporanNilai() {
+            localStorage.setItem('dataNilai', JSON.stringify(dataNilai));
+            alert('✅ Laporan nilai berhasil disimpan ke browser!');
         }
 
         function exportGuruExcel() {
@@ -1655,7 +1685,7 @@
 
         function simpanAbsensi() {
             localStorage.setItem('dataAbsensi', JSON.stringify(dataAbsensi));
-            alert('Data absensi berhasil disimpan!');
+            alert('✅ Data absensi berhasil disimpan ke browser!');
         }
 
         function loadLaporanAbsensi() {
@@ -1856,11 +1886,43 @@
             XLSX.writeFile(wb, `laporan_kehadiran_${kelas}_${monthNames[parseInt(bulan)]}_${tahun}.xlsx`);
         }
 
+        // Auto-save functions
+        function autoSaveData() {
+            localStorage.setItem('dataSiswa', JSON.stringify(dataSiswa));
+            localStorage.setItem('dataGuru', JSON.stringify(dataGuru));
+            localStorage.setItem('dataNilai', JSON.stringify(dataNilai));
+            localStorage.setItem('dataAbsensi', JSON.stringify(dataAbsensi));
+        }
+
+        // Auto-save every 30 seconds
+        setInterval(autoSaveData, 30000);
+
+        // Save data when page is about to be closed
+        window.addEventListener('beforeunload', function() {
+            autoSaveData();
+        });
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             tampilkanDaftarSiswa();
             tampilkanDaftarGuru();
+            
+            // Show auto-save notification
+            setTimeout(() => {
+                const notification = document.createElement('div');
+                notification.innerHTML = `
+                    <div class="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50" id="autoSaveNotif">
+                        ✅ Auto-save aktif - Data tersimpan otomatis setiap 30 detik
+                    </div>
+                `;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    const notif = document.getElementById('autoSaveNotif');
+                    if (notif) notif.remove();
+                }, 5000);
+            }, 2000);
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96d3ba0a161e5ffd',t:'MTc1NDg3MzI5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96d3dc97e67afdb2',t:'MTc1NDg3NDcxNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
