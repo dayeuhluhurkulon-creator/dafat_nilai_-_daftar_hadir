@@ -875,8 +875,36 @@
             const kelas = document.getElementById('filterKelas').value;
             const mapel = document.getElementById('filterMapel').value;
 
-            if (!kelas || !mapel) {
+            if (!kelas) {
                 document.getElementById('tabelNilai').innerHTML = '';
+                document.getElementById('namaGuruPengampu').value = '';
+                return;
+            }
+
+            if (!mapel) {
+                // Show students even if subject is not selected yet
+                const siswaKelas = dataSiswa.filter(siswa => siswa.kelas === kelas);
+                if (siswaKelas.length === 0) {
+                    document.getElementById('tabelNilai').innerHTML = '<p class="text-gray-500">Tidak ada siswa di kelas ini.</p>';
+                } else {
+                    document.getElementById('tabelNilai').innerHTML = `
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <p class="text-blue-800 font-medium">✅ Ditemukan ${siswaKelas.length} siswa di kelas ${kelas}</p>
+                            <p class="text-blue-600 text-sm mt-1">Silakan pilih mata pelajaran untuk mulai input nilai</p>
+                            <div class="mt-3">
+                                <h4 class="font-medium text-blue-800 mb-2">Daftar Siswa:</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    ${siswaKelas.map((siswa, index) => `
+                                        <div class="bg-white p-2 rounded border">
+                                            <span class="font-medium">${index + 1}. ${siswa.nama}</span>
+                                            <span class="text-gray-500 text-sm">(${siswa.nisn})</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
                 document.getElementById('namaGuruPengampu').value = '';
                 return;
             }
@@ -1272,8 +1300,36 @@
             const kelas = document.getElementById('laporanKelas').value;
             const mapel = document.getElementById('laporanMapel').value;
 
-            if (!kelas || !mapel) {
+            if (!kelas) {
                 document.getElementById('laporanNilai').innerHTML = '';
+                document.getElementById('grafikContainer').classList.add('hidden');
+                return;
+            }
+
+            if (!mapel) {
+                // Show students even if subject is not selected yet
+                const siswaKelas = dataSiswa.filter(siswa => siswa.kelas === kelas);
+                if (siswaKelas.length === 0) {
+                    document.getElementById('laporanNilai').innerHTML = '<p class="text-gray-500">Tidak ada siswa di kelas ini.</p>';
+                } else {
+                    document.getElementById('laporanNilai').innerHTML = `
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <p class="text-blue-800 font-medium">✅ Ditemukan ${siswaKelas.length} siswa di kelas ${kelas}</p>
+                            <p class="text-blue-600 text-sm mt-1">Silakan pilih mata pelajaran untuk melihat laporan nilai</p>
+                            <div class="mt-3">
+                                <h4 class="font-medium text-blue-800 mb-2">Daftar Siswa:</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    ${siswaKelas.map((siswa, index) => `
+                                        <div class="bg-white p-2 rounded border">
+                                            <span class="font-medium">${index + 1}. ${siswa.nama}</span>
+                                            <span class="text-gray-500 text-sm">(${siswa.nisn})</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
                 document.getElementById('grafikContainer').classList.add('hidden');
                 return;
             }
@@ -1590,8 +1646,35 @@
             const tahun = document.getElementById('absensiTahun').value;
             const tanggal = document.getElementById('tanggalAbsensi').value;
 
-            if (!kelas || !tanggal) {
+            if (!kelas) {
                 document.getElementById('tabelAbsensi').innerHTML = '';
+                return;
+            }
+
+            if (!tanggal) {
+                // Show students even if date is not selected yet
+                const siswaKelas = dataSiswa.filter(siswa => siswa.kelas === kelas);
+                if (siswaKelas.length === 0) {
+                    document.getElementById('tabelAbsensi').innerHTML = '<p class="text-gray-500">Tidak ada siswa di kelas ini.</p>';
+                } else {
+                    document.getElementById('tabelAbsensi').innerHTML = `
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <p class="text-blue-800 font-medium">✅ Ditemukan ${siswaKelas.length} siswa di kelas ${kelas}</p>
+                            <p class="text-blue-600 text-sm mt-1">Silakan pilih tanggal untuk mulai input absensi</p>
+                            <div class="mt-3">
+                                <h4 class="font-medium text-blue-800 mb-2">Daftar Siswa:</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    ${siswaKelas.map((siswa, index) => `
+                                        <div class="bg-white p-2 rounded border">
+                                            <span class="font-medium">${index + 1}. ${siswa.nama}</span>
+                                            <span class="text-gray-500 text-sm">(${siswa.nisn})</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
                 return;
             }
 
@@ -1693,8 +1776,35 @@
             const bulan = document.getElementById('laporanAbsensiBulan').value;
             const tahun = document.getElementById('laporanAbsensiTahun').value;
 
-            if (!kelas || !bulan || !tahun) {
+            if (!kelas) {
                 document.getElementById('laporanKehadiran').innerHTML = '';
+                return;
+            }
+
+            if (!bulan || !tahun) {
+                // Show students even if month/year is not selected yet
+                const siswaKelas = dataSiswa.filter(siswa => siswa.kelas === kelas);
+                if (siswaKelas.length === 0) {
+                    document.getElementById('laporanKehadiran').innerHTML = '<p class="text-gray-500">Tidak ada siswa di kelas ini.</p>';
+                } else {
+                    document.getElementById('laporanKehadiran').innerHTML = `
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <p class="text-blue-800 font-medium">✅ Ditemukan ${siswaKelas.length} siswa di kelas ${kelas}</p>
+                            <p class="text-blue-600 text-sm mt-1">Silakan pilih bulan dan tahun untuk melihat laporan kehadiran</p>
+                            <div class="mt-3">
+                                <h4 class="font-medium text-blue-800 mb-2">Daftar Siswa:</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    ${siswaKelas.map((siswa, index) => `
+                                        <div class="bg-white p-2 rounded border">
+                                            <span class="font-medium">${index + 1}. ${siswa.nama}</span>
+                                            <span class="text-gray-500 text-sm">(${siswa.nisn})</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
                 return;
             }
 
@@ -1924,5 +2034,5 @@
             }, 2000);
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96d3dc97e67afdb2',t:'MTc1NDg3NDcxNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96d3e38890ccce49',t:'MTc1NDg3NDk5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
