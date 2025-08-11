@@ -257,6 +257,7 @@
                     <button onclick="document.getElementById('fileImport').click()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200">Import Excel</button>
                     <button onclick="downloadTemplate()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200">Download Template</button>
                     <button onclick="exportExcel()" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition duration-200">Export Excel</button>
+                    <button onclick="hapusSemuaSiswa()" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-200">🗑️ Hapus Semua Siswa</button>
                 </div>
 
                 <!-- Daftar Siswa -->
@@ -746,12 +747,49 @@
                         delete dataNilai[key];
                     }
                 });
+                // Remove student attendance
+                Object.keys(dataAbsensi).forEach(key => {
+                    if (key.includes(siswa.nisn)) {
+                        delete dataAbsensi[key];
+                    }
+                });
                 
                 dataSiswa.splice(index, 1);
                 localStorage.setItem('dataSiswa', JSON.stringify(dataSiswa));
                 localStorage.setItem('dataNilai', JSON.stringify(dataNilai));
+                localStorage.setItem('dataAbsensi', JSON.stringify(dataAbsensi));
                 tampilkanDaftarSiswa();
                 alert('Siswa berhasil dihapus!');
+            }
+        }
+
+        function hapusSemuaSiswa() {
+            if (dataSiswa.length === 0) {
+                alert('Tidak ada data siswa untuk dihapus!');
+                return;
+            }
+
+            const konfirmasi = confirm(`⚠️ PERINGATAN!\n\nAnda akan menghapus SEMUA DATA SISWA (${dataSiswa.length} siswa).\n\nData yang akan dihapus:\n- Semua data siswa\n- Semua nilai siswa\n- Semua data absensi siswa\n\nTindakan ini TIDAK DAPAT DIBATALKAN!\n\nApakah Anda yakin ingin melanjutkan?`);
+            
+            if (konfirmasi) {
+                const konfirmasiKedua = confirm('Konfirmasi sekali lagi:\n\nSemua data siswa, nilai, dan absensi akan DIHAPUS PERMANEN!\n\nKlik OK untuk melanjutkan atau Cancel untuk membatalkan.');
+                
+                if (konfirmasiKedua) {
+                    // Clear all student data
+                    dataSiswa = [];
+                    dataNilai = {};
+                    dataAbsensi = {};
+                    
+                    // Save to localStorage
+                    localStorage.setItem('dataSiswa', JSON.stringify(dataSiswa));
+                    localStorage.setItem('dataNilai', JSON.stringify(dataNilai));
+                    localStorage.setItem('dataAbsensi', JSON.stringify(dataAbsensi));
+                    
+                    // Refresh display
+                    tampilkanDaftarSiswa();
+                    
+                    alert('✅ Semua data siswa berhasil dihapus!\n\nSemua data nilai dan absensi juga telah dibersihkan.');
+                }
             }
         }
 
@@ -2034,5 +2072,5 @@
             }, 2000);
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96d3f1198708ce49',t:'MTc1NDg3NTU1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96d3fd04a5407983',t:'MTc1NDg3NjA0My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
