@@ -587,26 +587,11 @@
     <input type="file" id="restoreFileInput" accept=".json" style="display: none;" onchange="handleRestoreFile()">
 
     <script>
-        // Data Storage
-        let dataSiswa = JSON.parse(localStorage.getItem('dataSiswa')) || [];
-        let dataGuru = JSON.parse(localStorage.getItem('dataGuru')) || [];
-        let dataNilai = JSON.parse(localStorage.getItem('dataNilai')) || {};
-        let dataAbsensi = JSON.parse(localStorage.getItem('dataAbsensi')) || {};
-
-        // Initialize default teachers (wali kelas)
-        if (dataGuru.length === 0) {
-            const defaultGuru = [
-                { nama: 'Guru Wali Kelas 1', mapel: 'Wali Kelas', kelas: '1' },
-                { nama: 'Guru Wali Kelas 2A', mapel: 'Wali Kelas', kelas: '2A' },
-                { nama: 'Guru Wali Kelas 2B', mapel: 'Wali Kelas', kelas: '2B' },
-                { nama: 'Guru Wali Kelas 3', mapel: 'Wali Kelas', kelas: '3' },
-                { nama: 'Guru Wali Kelas 4', mapel: 'Wali Kelas', kelas: '4' },
-                { nama: 'Guru Wali Kelas 5', mapel: 'Wali Kelas', kelas: '5' },
-                { nama: 'Guru Wali Kelas 6', mapel: 'Wali Kelas', kelas: '6' }
-            ];
-            dataGuru = defaultGuru;
-            localStorage.setItem('dataGuru', JSON.stringify(dataGuru));
-        }
+        // Data Storage - Initialize as empty, will be loaded in DOMContentLoaded
+        let dataSiswa = [];
+        let dataGuru = [];
+        let dataNilai = {};
+        let dataAbsensi = {};
 
         // Backup and Restore Functions
         function backupData() {
@@ -913,6 +898,10 @@
             const kelas = document.getElementById('filterKelas').value;
             const mapel = document.getElementById('filterMapel').value;
 
+            // Debug logging
+            console.log('loadNilaiData called:', { kelas, mapel, totalSiswa: dataSiswa.length });
+            console.log('All students:', dataSiswa);
+
             if (!kelas) {
                 document.getElementById('tabelNilai').innerHTML = '';
                 document.getElementById('namaGuruPengampu').value = '';
@@ -922,8 +911,23 @@
             if (!mapel) {
                 // Show students even if subject is not selected yet
                 const siswaKelas = dataSiswa.filter(siswa => siswa.kelas === kelas);
+                console.log('Students in class', kelas, ':', siswaKelas);
+                
                 if (siswaKelas.length === 0) {
-                    document.getElementById('tabelNilai').innerHTML = '<p class="text-gray-500">Tidak ada siswa di kelas ini.</p>';
+                    document.getElementById('tabelNilai').innerHTML = `
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <p class="text-yellow-800 font-medium">⚠️ Tidak ada siswa di kelas ${kelas}</p>
+                            <p class="text-yellow-600 text-sm mt-1">Total siswa di sistem: ${dataSiswa.length}</p>
+                            <div class="mt-3">
+                                <h4 class="font-medium text-yellow-800 mb-2">Kelas yang tersedia:</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    ${[...new Set(dataSiswa.map(s => s.kelas))].map(k => `
+                                        <span class="bg-white px-2 py-1 rounded border text-sm">${k}</span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
                 } else {
                     document.getElementById('tabelNilai').innerHTML = `
                         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -1338,6 +1342,9 @@
             const kelas = document.getElementById('laporanKelas').value;
             const mapel = document.getElementById('laporanMapel').value;
 
+            // Debug logging
+            console.log('loadLaporanData called:', { kelas, mapel, totalSiswa: dataSiswa.length });
+
             if (!kelas) {
                 document.getElementById('laporanNilai').innerHTML = '';
                 document.getElementById('grafikContainer').classList.add('hidden');
@@ -1347,8 +1354,23 @@
             if (!mapel) {
                 // Show students even if subject is not selected yet
                 const siswaKelas = dataSiswa.filter(siswa => siswa.kelas === kelas);
+                console.log('Students in class for report:', siswaKelas);
+                
                 if (siswaKelas.length === 0) {
-                    document.getElementById('laporanNilai').innerHTML = '<p class="text-gray-500">Tidak ada siswa di kelas ini.</p>';
+                    document.getElementById('laporanNilai').innerHTML = `
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <p class="text-yellow-800 font-medium">⚠️ Tidak ada siswa di kelas ${kelas}</p>
+                            <p class="text-yellow-600 text-sm mt-1">Total siswa di sistem: ${dataSiswa.length}</p>
+                            <div class="mt-3">
+                                <h4 class="font-medium text-yellow-800 mb-2">Kelas yang tersedia:</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    ${[...new Set(dataSiswa.map(s => s.kelas))].map(k => `
+                                        <span class="bg-white px-2 py-1 rounded border text-sm">${k}</span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
                 } else {
                     document.getElementById('laporanNilai').innerHTML = `
                         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -1684,6 +1706,9 @@
             const tahun = document.getElementById('absensiTahun').value;
             const tanggal = document.getElementById('tanggalAbsensi').value;
 
+            // Debug logging
+            console.log('loadAbsensiData called:', { kelas, totalSiswa: dataSiswa.length });
+
             if (!kelas) {
                 document.getElementById('tabelAbsensi').innerHTML = '';
                 return;
@@ -1691,9 +1716,23 @@
 
             // Filter students by class
             const siswaKelas = dataSiswa.filter(siswa => siswa.kelas === kelas);
+            console.log('Students in class for attendance:', siswaKelas);
             
             if (siswaKelas.length === 0) {
-                document.getElementById('tabelAbsensi').innerHTML = '<p class="text-gray-500">Tidak ada siswa di kelas ini.</p>';
+                document.getElementById('tabelAbsensi').innerHTML = `
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <p class="text-yellow-800 font-medium">⚠️ Tidak ada siswa di kelas ${kelas}</p>
+                        <p class="text-yellow-600 text-sm mt-1">Total siswa di sistem: ${dataSiswa.length}</p>
+                        <div class="mt-3">
+                            <h4 class="font-medium text-yellow-800 mb-2">Kelas yang tersedia:</h4>
+                            <div class="flex flex-wrap gap-2">
+                                ${[...new Set(dataSiswa.map(s => s.kelas))].map(k => `
+                                    <span class="bg-white px-2 py-1 rounded border text-sm">${k}</span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
                 return;
             }
 
@@ -1814,6 +1853,9 @@
             const bulan = document.getElementById('laporanAbsensiBulan').value;
             const tahun = document.getElementById('laporanAbsensiTahun').value;
 
+            // Debug logging
+            console.log('loadLaporanAbsensi called:', { kelas, bulan, tahun, totalSiswa: dataSiswa.length });
+
             if (!kelas) {
                 document.getElementById('laporanKehadiran').innerHTML = '';
                 return;
@@ -1821,9 +1863,23 @@
 
             // Filter students by class
             const siswaKelas = dataSiswa.filter(siswa => siswa.kelas === kelas);
+            console.log('Students in class for attendance report:', siswaKelas);
             
             if (siswaKelas.length === 0) {
-                document.getElementById('laporanKehadiran').innerHTML = '<p class="text-gray-500">Tidak ada siswa di kelas ini.</p>';
+                document.getElementById('laporanKehadiran').innerHTML = `
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <p class="text-yellow-800 font-medium">⚠️ Tidak ada siswa di kelas ${kelas}</p>
+                        <p class="text-yellow-600 text-sm mt-1">Total siswa di sistem: ${dataSiswa.length}</p>
+                        <div class="mt-3">
+                            <h4 class="font-medium text-yellow-800 mb-2">Kelas yang tersedia:</h4>
+                            <div class="flex flex-wrap gap-2">
+                                ${[...new Set(dataSiswa.map(s => s.kelas))].map(k => `
+                                    <span class="bg-white px-2 py-1 rounded border text-sm">${k}</span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
                 return;
             }
 
@@ -2052,8 +2108,54 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            // Load data from localStorage first
+            dataSiswa = JSON.parse(localStorage.getItem('dataSiswa')) || [];
+            dataGuru = JSON.parse(localStorage.getItem('dataGuru')) || [];
+            dataNilai = JSON.parse(localStorage.getItem('dataNilai')) || {};
+            dataAbsensi = JSON.parse(localStorage.getItem('dataAbsensi')) || {};
+            
+            // Initialize default teachers if empty
+            if (dataGuru.length === 0) {
+                const defaultGuru = [
+                    { nama: 'Guru Wali Kelas 1', mapel: 'Wali Kelas', kelas: '1' },
+                    { nama: 'Guru Wali Kelas 2A', mapel: 'Wali Kelas', kelas: '2A' },
+                    { nama: 'Guru Wali Kelas 2B', mapel: 'Wali Kelas', kelas: '2B' },
+                    { nama: 'Guru Wali Kelas 3', mapel: 'Wali Kelas', kelas: '3' },
+                    { nama: 'Guru Wali Kelas 4', mapel: 'Wali Kelas', kelas: '4' },
+                    { nama: 'Guru Wali Kelas 5', mapel: 'Wali Kelas', kelas: '5' },
+                    { nama: 'Guru Wali Kelas 6', mapel: 'Wali Kelas', kelas: '6' }
+                ];
+                dataGuru = defaultGuru;
+                localStorage.setItem('dataGuru', JSON.stringify(dataGuru));
+            }
+            
+            // Display initial data
             tampilkanDaftarSiswa();
             tampilkanDaftarGuru();
+            
+            // Add sample data if no students exist (for demo purposes)
+            if (dataSiswa.length === 0) {
+                const sampleStudents = [
+                    { nisn: '1234567890', nama: 'Ahmad Rizki', kelas: '1' },
+                    { nisn: '1234567891', nama: 'Siti Nurhaliza', kelas: '1' },
+                    { nisn: '1234567892', nama: 'Budi Santoso', kelas: '2A' },
+                    { nisn: '1234567893', nama: 'Dewi Sartika', kelas: '2A' },
+                    { nisn: '1234567894', nama: 'Eko Prasetyo', kelas: '3' },
+                    { nisn: '1234567895', nama: 'Fitri Handayani', kelas: '3' }
+                ];
+                
+                // Ask user if they want sample data
+                if (confirm('Tidak ada data siswa ditemukan. Apakah Anda ingin menambahkan data contoh untuk demo?')) {
+                    dataSiswa = sampleStudents;
+                    localStorage.setItem('dataSiswa', JSON.stringify(dataSiswa));
+                    tampilkanDaftarSiswa();
+                    
+                    // Show notification
+                    setTimeout(() => {
+                        alert('✅ Data contoh berhasil ditambahkan!\n\n6 siswa contoh telah ditambahkan ke berbagai kelas.\nAnda dapat menghapus atau mengedit data ini sesuai kebutuhan.');
+                    }, 500);
+                }
+            }
             
             // Show auto-save notification
             setTimeout(() => {
@@ -2072,5 +2174,5 @@
             }, 2000);
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96d3fd04a5407983',t:'MTc1NDg3NjA0My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96d40938147ace56',t:'MTc1NDg3NjU0My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
