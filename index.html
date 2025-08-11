@@ -7,6 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <style>
         @media print {
             .no-print { display: none !important; }
@@ -29,7 +34,14 @@
             <div class="flex items-center justify-between flex-wrap gap-4">
                 <div>
                     <h2 class="text-xl font-bold mb-2">🚀 Sistem Daftar Nilai Online</h2>
-                    <p class="text-sm opacity-90">Aplikasi ini berjalan di GitHub Pages - Data tersimpan di browser lokal Anda</p>
+                    <p class="text-sm opacity-90">Aplikasi ini berjalan di GitHub Pages dengan Firebase Cloud Database</p>
+                    <div class="flex items-center gap-2 mt-2">
+                        <div id="firebaseStatus" class="flex items-center gap-1">
+                            <div class="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                            <span class="text-xs">Menghubungkan ke Firebase...</span>
+                        </div>
+                        <div id="userInfo" class="text-xs opacity-75 hidden"></div>
+                    </div>
                 </div>
                 <div class="flex gap-2">
                     <button onclick="backupData()" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
@@ -37,6 +49,9 @@
                     </button>
                     <button onclick="restoreData()" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                         📥 Restore Data
+                    </button>
+                    <button onclick="syncData()" id="syncButton" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-sm font-medium transition-colors hidden">
+                        🔄 Sync Data
                     </button>
                 </div>
             </div>
@@ -73,34 +88,41 @@
                 <div class="grid md:grid-cols-2 gap-6">
                     <!-- Cara Deploy -->
                     <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg">
-                        <h3 class="text-lg font-bold text-indigo-800 mb-4">🚀 Cara Deploy ke GitHub Pages</h3>
+                        <h3 class="text-lg font-bold text-indigo-800 mb-4">🚀 Cara Setup Firebase + GitHub Pages</h3>
                         <ol class="space-y-3 text-sm">
                             <li class="flex items-start">
                                 <span class="bg-indigo-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">1</span>
                                 <div>
-                                    <strong>Buat Repository GitHub</strong>
-                                    <p class="text-gray-600">Login ke GitHub → New Repository → Beri nama (contoh: "daftar-nilai")</p>
+                                    <strong>Buat Project Firebase</strong>
+                                    <p class="text-gray-600">Buka <a href="https://console.firebase.google.com" target="_blank" class="text-blue-600 underline">Firebase Console</a> → Create Project → Beri nama project</p>
                                 </div>
                             </li>
                             <li class="flex items-start">
                                 <span class="bg-indigo-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">2</span>
                                 <div>
-                                    <strong>Upload File HTML</strong>
-                                    <p class="text-gray-600">Upload file ini dengan nama <code class="bg-gray-200 px-1 rounded">index.html</code></p>
+                                    <strong>Setup Firestore Database</strong>
+                                    <p class="text-gray-600">Firestore Database → Create database → Start in test mode → Pilih region</p>
                                 </div>
                             </li>
                             <li class="flex items-start">
                                 <span class="bg-indigo-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">3</span>
                                 <div>
-                                    <strong>Aktifkan GitHub Pages</strong>
-                                    <p class="text-gray-600">Settings → Pages → Source: Deploy from branch → Branch: main → Save</p>
+                                    <strong>Setup Authentication</strong>
+                                    <p class="text-gray-600">Authentication → Get started → Sign-in method → Anonymous → Enable</p>
                                 </div>
                             </li>
                             <li class="flex items-start">
                                 <span class="bg-indigo-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">4</span>
                                 <div>
-                                    <strong>Akses Website</strong>
-                                    <p class="text-gray-600">URL: <code class="bg-gray-200 px-1 rounded">https://username.github.io/repository-name</code></p>
+                                    <strong>Dapatkan Config Firebase</strong>
+                                    <p class="text-gray-600">Project Settings → General → Your apps → Web app → Copy config</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-indigo-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">5</span>
+                                <div>
+                                    <strong>Update Kode & Deploy</strong>
+                                    <p class="text-gray-600">Ganti firebaseConfig di kode → Upload ke GitHub → Aktifkan Pages</p>
                                 </div>
                             </li>
                         </ol>
@@ -194,20 +216,46 @@
                     </div>
                 </div>
 
+                <!-- Firebase Configuration -->
+                <div class="mt-8 bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-bold text-orange-800 mb-4">🔧 Konfigurasi Firebase</h3>
+                    <div class="bg-white p-4 rounded border">
+                        <p class="text-sm text-gray-600 mb-3">Ganti konfigurasi Firebase di baris 1450-1460 dengan config dari project Firebase Anda:</p>
+                        <pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto"><code>const firebaseConfig = {
+  apiKey: "your-api-key-here",
+  authDomain: "your-project.firebaseapp.com",
+  projectId: "your-project-id",
+  storageBucket: "your-project.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "your-app-id"
+};</code></pre>
+                        <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                            <p class="text-xs text-yellow-800">
+                                <strong>⚠️ Penting:</strong> Pastikan Firestore Rules diset ke test mode atau public read/write untuk demo.
+                                Untuk production, gunakan rules yang lebih ketat dengan authentication.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Quick Start -->
-                <div class="mt-8 bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg">
+                <div class="mt-6 bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg">
                     <h3 class="text-lg font-bold text-purple-800 mb-4">🚀 Quick Start</h3>
-                    <div class="grid md:grid-cols-3 gap-4 text-sm">
+                    <div class="grid md:grid-cols-4 gap-4 text-sm">
                         <div class="text-center">
                             <div class="bg-purple-600 text-white rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2 text-xl">1</div>
-                            <p class="font-medium">Copy kode HTML ini</p>
+                            <p class="font-medium">Setup Firebase Project</p>
                         </div>
                         <div class="text-center">
                             <div class="bg-purple-600 text-white rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2 text-xl">2</div>
-                            <p class="font-medium">Upload ke GitHub sebagai index.html</p>
+                            <p class="font-medium">Update Firebase Config</p>
                         </div>
                         <div class="text-center">
                             <div class="bg-purple-600 text-white rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2 text-xl">3</div>
+                            <p class="font-medium">Upload ke GitHub</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="bg-purple-600 text-white rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2 text-xl">4</div>
                             <p class="font-medium">Aktifkan GitHub Pages</p>
                         </div>
                     </div>
@@ -587,11 +635,222 @@
     <input type="file" id="restoreFileInput" accept=".json" style="display: none;" onchange="handleRestoreFile()">
 
     <script>
+        // Firebase Configuration - CONNECTED TO YOUR PROJECT
+        const firebaseConfig = {
+            apiKey: "AIzaSyAHKtCtzDE69y89Kd7aEtmPC3fSdHU25_8",
+            authDomain: "daftarnilaidaftarhadir.firebaseapp.com",
+            projectId: "daftarnilaidaftarhadir",
+            storageBucket: "daftarnilaidaftarhadir.firebasestorage.app",
+            messagingSenderId: "159660226017",
+            appId: "1:159660226017:web:a4358396994ab0c8674ea0",
+            measurementId: "G-FLTJTLM0ML"
+        };
+
+        // Initialize Firebase
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let isFirebaseConnected = false;
+
         // Data Storage - Initialize as empty, will be loaded in DOMContentLoaded
         let dataSiswa = [];
         let dataGuru = [];
         let dataNilai = {};
         let dataAbsensi = {};
+
+        // Firebase Functions
+        function initializeFirebase() {
+            try {
+                // Check if Firebase config is still demo
+                if (firebaseConfig.apiKey === "demo-api-key") {
+                    updateFirebaseStatus('demo', 'Mode Demo - Gunakan localStorage');
+                    return;
+                }
+
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                auth = firebase.auth();
+
+                // Enable offline persistence
+                db.enablePersistence().catch((err) => {
+                    console.log('Persistence error:', err);
+                });
+
+                // Sign in anonymously
+                auth.signInAnonymously().then((result) => {
+                    currentUser = result.user;
+                    isFirebaseConnected = true;
+                    updateFirebaseStatus('connected', `Terhubung sebagai ${currentUser.uid.substring(0, 8)}...`);
+                    
+                    // Load data from Firebase
+                    loadDataFromFirebase();
+                    
+                    // Show sync button
+                    document.getElementById('syncButton').classList.remove('hidden');
+                }).catch((error) => {
+                    console.error('Auth error:', error);
+                    updateFirebaseStatus('error', 'Gagal login - Gunakan localStorage');
+                });
+
+            } catch (error) {
+                console.error('Firebase init error:', error);
+                updateFirebaseStatus('error', 'Gagal inisialisasi - Gunakan localStorage');
+            }
+        }
+
+        function updateFirebaseStatus(status, message) {
+            const statusElement = document.getElementById('firebaseStatus');
+            const userInfoElement = document.getElementById('userInfo');
+            
+            statusElement.innerHTML = '';
+            userInfoElement.classList.add('hidden');
+            
+            switch (status) {
+                case 'connected':
+                    statusElement.innerHTML = `
+                        <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                        <span class="text-xs">Firebase Online</span>
+                    `;
+                    userInfoElement.textContent = message;
+                    userInfoElement.classList.remove('hidden');
+                    break;
+                case 'demo':
+                    statusElement.innerHTML = `
+                        <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                        <span class="text-xs">Mode Demo</span>
+                    `;
+                    userInfoElement.textContent = message;
+                    userInfoElement.classList.remove('hidden');
+                    break;
+                case 'error':
+                    statusElement.innerHTML = `
+                        <div class="w-2 h-2 bg-red-400 rounded-full"></div>
+                        <span class="text-xs">Offline Mode</span>
+                    `;
+                    userInfoElement.textContent = message;
+                    userInfoElement.classList.remove('hidden');
+                    break;
+                default:
+                    statusElement.innerHTML = `
+                        <div class="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                        <span class="text-xs">Menghubungkan...</span>
+                    `;
+            }
+        }
+
+        async function loadDataFromFirebase() {
+            if (!isFirebaseConnected || !db) return;
+
+            try {
+                // Load students
+                const siswaSnapshot = await db.collection('siswa').get();
+                if (!siswaSnapshot.empty) {
+                    dataSiswa = siswaSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                }
+
+                // Load teachers
+                const guruSnapshot = await db.collection('guru').get();
+                if (!guruSnapshot.empty) {
+                    dataGuru = guruSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                }
+
+                // Load grades
+                const nilaiSnapshot = await db.collection('nilai').get();
+                if (!nilaiSnapshot.empty) {
+                    dataNilai = {};
+                    nilaiSnapshot.docs.forEach(doc => {
+                        dataNilai[doc.id] = doc.data();
+                    });
+                }
+
+                // Load attendance
+                const absensiSnapshot = await db.collection('absensi').get();
+                if (!absensiSnapshot.empty) {
+                    dataAbsensi = {};
+                    absensiSnapshot.docs.forEach(doc => {
+                        dataAbsensi[doc.id] = doc.data();
+                    });
+                }
+
+                // Update displays
+                tampilkanDaftarSiswa();
+                tampilkanDaftarGuru();
+
+                console.log('Data loaded from Firebase successfully');
+            } catch (error) {
+                console.error('Error loading data from Firebase:', error);
+            }
+        }
+
+        async function saveDataToFirebase() {
+            if (!isFirebaseConnected || !db) {
+                alert('Firebase tidak terhubung. Data disimpan ke localStorage saja.');
+                return;
+            }
+
+            try {
+                const batch = db.batch();
+
+                // Save students
+                dataSiswa.forEach((siswa, index) => {
+                    const docRef = db.collection('siswa').doc(siswa.id || `siswa_${index}`);
+                    batch.set(docRef, siswa);
+                });
+
+                // Save teachers
+                dataGuru.forEach((guru, index) => {
+                    const docRef = db.collection('guru').doc(guru.id || `guru_${index}`);
+                    batch.set(docRef, guru);
+                });
+
+                // Save grades
+                Object.keys(dataNilai).forEach(key => {
+                    const docRef = db.collection('nilai').doc(key);
+                    batch.set(docRef, dataNilai[key]);
+                });
+
+                // Save attendance
+                Object.keys(dataAbsensi).forEach(key => {
+                    const docRef = db.collection('absensi').doc(key);
+                    batch.set(docRef, dataAbsensi[key]);
+                });
+
+                await batch.commit();
+                console.log('Data saved to Firebase successfully');
+                
+                // Show success notification
+                showNotification('✅ Data berhasil disinkronisasi ke Firebase!', 'success');
+            } catch (error) {
+                console.error('Error saving data to Firebase:', error);
+                showNotification('❌ Gagal menyimpan ke Firebase: ' + error.message, 'error');
+            }
+        }
+
+        function syncData() {
+            if (!isFirebaseConnected) {
+                alert('Firebase tidak terhubung!');
+                return;
+            }
+            
+            saveDataToFirebase();
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-blue-600';
+            
+            notification.innerHTML = `
+                <div class="fixed bottom-4 right-4 ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg z-50" id="notification">
+                    ${message}
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                const notif = document.getElementById('notification');
+                if (notif) notif.remove();
+            }, 5000);
+        }
 
         // Backup and Restore Functions
         function backupData() {
@@ -1281,22 +1540,38 @@
 
         function simpanDataSiswa() {
             localStorage.setItem('dataSiswa', JSON.stringify(dataSiswa));
-            alert('✅ Data siswa berhasil disimpan ke browser!');
+            if (isFirebaseConnected) {
+                saveDataToFirebase();
+            } else {
+                alert('✅ Data siswa berhasil disimpan ke browser!');
+            }
         }
 
         function simpanDataGuru() {
             localStorage.setItem('dataGuru', JSON.stringify(dataGuru));
-            alert('✅ Data guru berhasil disimpan ke browser!');
+            if (isFirebaseConnected) {
+                saveDataToFirebase();
+            } else {
+                alert('✅ Data guru berhasil disimpan ke browser!');
+            }
         }
 
         function simpanLaporanAbsensi() {
             localStorage.setItem('dataAbsensi', JSON.stringify(dataAbsensi));
-            alert('✅ Laporan absensi berhasil disimpan ke browser!');
+            if (isFirebaseConnected) {
+                saveDataToFirebase();
+            } else {
+                alert('✅ Laporan absensi berhasil disimpan ke browser!');
+            }
         }
 
         function simpanLaporanNilai() {
             localStorage.setItem('dataNilai', JSON.stringify(dataNilai));
-            alert('✅ Laporan nilai berhasil disimpan ke browser!');
+            if (isFirebaseConnected) {
+                saveDataToFirebase();
+            } else {
+                alert('✅ Laporan nilai berhasil disimpan ke browser!');
+            }
         }
 
         function exportGuruExcel() {
@@ -2096,10 +2371,15 @@
             localStorage.setItem('dataGuru', JSON.stringify(dataGuru));
             localStorage.setItem('dataNilai', JSON.stringify(dataNilai));
             localStorage.setItem('dataAbsensi', JSON.stringify(dataAbsensi));
+            
+            // Auto-sync to Firebase if connected
+            if (isFirebaseConnected) {
+                saveDataToFirebase();
+            }
         }
 
-        // Auto-save every 30 seconds
-        setInterval(autoSaveData, 30000);
+        // Auto-save every 60 seconds (increased interval for Firebase)
+        setInterval(autoSaveData, 60000);
 
         // Save data when page is about to be closed
         window.addEventListener('beforeunload', function() {
@@ -2108,7 +2388,10 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            // Load data from localStorage first
+            // Initialize Firebase first
+            initializeFirebase();
+            
+            // Load data from localStorage first (fallback)
             dataSiswa = JSON.parse(localStorage.getItem('dataSiswa')) || [];
             dataGuru = JSON.parse(localStorage.getItem('dataGuru')) || [];
             dataNilai = JSON.parse(localStorage.getItem('dataNilai')) || {};
@@ -2157,22 +2440,28 @@
                 }
             }
             
-            // Show auto-save notification
+            // Show system status notification
             setTimeout(() => {
+                const isDemo = firebaseConfig.apiKey === "demo-api-key";
+                const message = isDemo 
+                    ? '🔧 Mode Demo - Update konfigurasi Firebase untuk sinkronisasi cloud'
+                    : '✅ Sistem siap - Auto-sync Firebase aktif setiap 60 detik';
+                const bgColor = isDemo ? 'bg-blue-600' : 'bg-green-600';
+                
                 const notification = document.createElement('div');
                 notification.innerHTML = `
-                    <div class="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50" id="autoSaveNotif">
-                        ✅ Auto-save aktif - Data tersimpan otomatis setiap 30 detik
+                    <div class="fixed bottom-4 right-4 ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg z-50" id="systemNotif">
+                        ${message}
                     </div>
                 `;
                 document.body.appendChild(notification);
                 
                 setTimeout(() => {
-                    const notif = document.getElementById('autoSaveNotif');
+                    const notif = document.getElementById('systemNotif');
                     if (notif) notif.remove();
-                }, 5000);
-            }, 2000);
+                }, 7000);
+            }, 3000);
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96d40938147ace56',t:'MTc1NDg3NjU0My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96d472a4e40287f9',t:'MTc1NDg4MDg2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
